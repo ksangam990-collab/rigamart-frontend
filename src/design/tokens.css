@@ -1,0 +1,53 @@
+/* ─── Rigamart Design System Tokens (Editorial Sapphire & Saffron Marketplace) ─── */
+
+:root {
+  /* Surfaces */
+  --color-canvas: #F8FAFC;
+  --color-surface: #FFFFFF;
+  
+  /* Typography */
+  --color-ink: #0F172A;
+  --color-muted: #64748B;
+  --color-line: #E2E8F0;
+  
+  /* Brand: Royal Sapphire Blue */
+  --color-brand: #2563EB;
+  --color-brand-dark: #1D4ED8;
+  --color-brand-soft: #EFF6FF;
+  
+  /* Functional Accents: Warm Indian Saffron */
+  --color-accent: #FF7A00;
+  --color-accent-soft: #FFF7ED;
+  --color-success: #10B981;
+  --color-success-soft: #ECFDF5;
+  --color-warning: #F59E0B;
+  --color-warning-soft: #FFFBEB;
+  --color-danger: #EF4444;
+  --color-danger-soft: #FEF2F2;
+}
+
+[data-theme="dark"] {
+  /* Surfaces */
+  --color-canvas: #0B0F19;
+  --color-surface: #111827;
+  
+  /* Typography */
+  --color-ink: #F8FAFC;
+  --color-muted: #94A3B8;
+  --color-line: #1F2937;
+  
+  /* Brand: Royal Sapphire Blue (accessible on dark surfaces) */
+  --color-brand: #3B82F6;
+  --color-brand-dark: #2563EB;
+  --color-brand-soft: #1E293B;
+  
+  /* Functional Accents */
+  --color-accent: #FB923C;
+  --color-accent-soft: #431407;
+  --color-success: #34D399;
+  --color-success-soft: #064E3B;
+  --color-warning: #FBBF24;
+  --color-warning-soft: #451A03;
+  --color-danger: #F87171;
+  --color-danger-soft: #450A0A;
+}

@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Mail, Lock, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Phone, Eye, EyeOff } from 'lucide-react';
 import { loginUser, clearError } from '../features/auth/authSlice.js';
+import Logo from '../components/common/Logo.jsx';
+import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
+import GuestOtpModal from '../components/checkout/GuestOtpModal.jsx';
+import { Button } from '../components/ui/index.js';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    return localStorage.getItem('rigamart_remembered_email') || '';
+  });
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    return !!localStorage.getItem('rigamart_remembered_email');
+  });
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -20,6 +32,13 @@ export default function LoginPage() {
     e.preventDefault();
     dispatch(clearError());
 
+    // Save or clear remembered email
+    if (rememberMe) {
+      localStorage.setItem('rigamart_remembered_email', email.trim());
+    } else {
+      localStorage.removeItem('rigamart_remembered_email');
+    }
+
     const result = await dispatch(loginUser({ email, password }));
     if (loginUser.fulfilled.match(result)) {
       navigate(redirectPath, { replace: true });
@@ -27,26 +46,31 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 space-y-6">
+    <div className="min-h-[85vh] bg-canvas flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+      <motion.div
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="max-w-md w-full bg-surface rounded-2xl shadow-subtle border border-line p-7 sm:p-8 space-y-6"
+      >
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-50 text-brand-600 font-extrabold text-2xl mb-3 shadow-inner">
-            R
+          <div className="flex justify-center mb-3">
+            <Logo variant="icon" size="lg" />
           </div>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight">Welcome Back</h2>
-          <p className="text-sm text-gray-500 mt-1">Sign in to manage orders, wishlist & addresses</p>
+          <h1 className="text-2xl font-bold text-ink tracking-tight">Welcome Back</h1>
+          <p className="text-xs text-muted mt-1">Sign in to manage orders, wishlist & addresses</p>
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 bg-danger-soft border border-danger/20 text-danger text-xs rounded-xl">
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-1.5">
               Email Address
             </label>
             <div className="relative">
@@ -56,55 +80,111 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-canvas border border-line rounded-xl text-xs text-ink outline-none focus:bg-surface focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-muted"
               />
-              <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-3 pointer-events-none" />
+              <Mail className="w-4 h-4 text-muted absolute left-3.5 top-3 pointer-events-none" />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted">
+                Password
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-[11px] font-medium text-brand hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
+                className="w-full pl-10 pr-10 py-2.5 bg-canvas border border-line rounded-xl text-xs text-ink outline-none focus:bg-surface focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-muted"
               />
-              <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-3 pointer-events-none" />
+              <Lock className="w-4 h-4 text-muted absolute left-3.5 top-3 pointer-events-none" />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-2.5 text-muted hover:text-ink transition-colors"
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
-          <button
+          {/* Remember Me Checkbox */}
+          <div className="flex items-center pt-1">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-line text-brand focus:ring-brand focus:ring-offset-0 transition-colors"
+              />
+              <span className="text-xs text-ink font-medium">Remember my login</span>
+            </label>
+          </div>
+
+          <Button
             type="submit"
-            disabled={isLoading}
-            className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            variant="primary"
+            size="lg"
+            isLoading={isLoading}
+            className="w-full text-xs font-bold shadow-subtle"
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              <>
-                Sign In
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
+            <span>Sign In</span>
+            <ArrowRight className="w-4 h-4 ml-1.5" />
+          </Button>
         </form>
 
-        <div className="text-center pt-2 text-xs text-gray-500">
+        {/* Divider */}
+        <div className="relative my-3">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-line" />
+          </div>
+          <div className="relative flex justify-center text-[10px] uppercase">
+            <span className="bg-surface px-3 text-muted font-bold tracking-wider">Or continue with</span>
+          </div>
+        </div>
+
+        {/* Google One-Tap & Sign In Button */}
+        <GoogleAuthButton mode="login" enableOneTap={true} />
+
+        {/* Mobile OTP Instant Login Button */}
+        <Button
+          type="button"
+          variant="outline"
+          size="md"
+          onClick={() => setIsOtpModalOpen(true)}
+          className="w-full text-xs text-ink"
+        >
+          <Phone className="w-3.5 h-3.5 mr-2 text-brand" />
+          <span>Sign In with Mobile OTP (Instant)</span>
+        </Button>
+
+        <div className="text-center pt-1 text-xs text-muted">
           New to Rigamart?{' '}
-          <Link to="/register" className="font-bold text-brand-600 hover:underline">
+          <Link to="/register" className="font-bold text-brand hover:underline">
             Create an account
           </Link>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Mobile OTP Login Modal */}
+      <GuestOtpModal
+        isOpen={isOtpModalOpen}
+        onClose={() => setIsOtpModalOpen(false)}
+        onSuccess={() => navigate(redirectPath, { replace: true })}
+        title="Sign In with Mobile OTP"
+        subtitle="Enter your 10-digit mobile number to sign in instantly with a 6-digit code."
+      />
     </div>
   );
 }
